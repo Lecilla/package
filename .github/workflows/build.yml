@@ -1,0 +1,37 @@
+name: Android Release CI
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v4
+        with:
+          channel: stable
+          version: 3.44.0
+
+      - name: Unpack source code zip
+        run: unzip source.zip -d ./source
+
+      - name: Install dependencies
+        working-directory: ./source
+        run: flutter pub get
+
+      - name: Package apk
+        working-directory: ./source
+        run: flutter build apk --release
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Release artifact
+          path: source/build/app/outputs/apk/release/app-release.apk
